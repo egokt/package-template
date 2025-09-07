@@ -1,0 +1,63 @@
+{
+  "name": "template-replace-me",
+  "description": "TODO: Replace with actual description",
+  "version": "0.0.1",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "type": "module",
+  "author": "Erek Gokturk",
+  "license": "UNLICENSED",
+  "private": true,
+  "config": {
+    "files": {
+      "package": "package.json README.md LICENSE.md",
+      "build": {
+        "package": "build/package.json build/README.md build/LICENSE.md"
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.build.json",
+    "compile:prod": "tsc -p tsconfig.build.json --sourceMap false --declarationMap false --declaration false",
+    "clean": "rm -rf build",
+    "clean:artifacts:package": "rm -f build/package.json build/README.md build/LICENSE.md",
+    "copy-artifacts": "npm run copy-artifacts:package",
+    "copy-artifacts:package": "copyfiles ${npm_package_config_files_package} build",
+    "build": "npm run compile && npm run copy-artifacts",
+    "build:prod": "npm run clean && npm run compile:prod && npm run copy-artifacts",
+    "build:watch": "npm run build && concurrently 'tsc -p tsconfig.build.json -w' 'npm run monitor -- npm run copy-artifacts'",
+    "monitor": "fswatch -0 ${npm_package_config_files_package} | xargs -n 1 -0 -I {}",
+    "monitor:package": "fswatch -0 ${npm_package_config_files_package} | xargs -n 1 -0 -I {}",
+    "format": "prettier --write . && eslint src tests --fix",
+    "format:check": "prettier --check . && eslint src tests --max-warnings 0",
+    "format:fix": "prettier --write . && eslint src tests --fix",
+    "lint": "eslint src tests --max-warnings 0",
+    "lint:fix": "eslint src tests --fix",
+    "lint:check": "eslint src tests --max-warnings 0 --no-fix",
+    "lint:format": "npm run format:check",
+    "ci:check": "npm run lint:check && npm run format:check && npm run test",
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules\" npx jest",
+    "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules\" npx jest --watch",
+    "publish": "npm run build && cd build && npm publish && cd -"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "concurrently": "^9.2.1",
+    "copyfiles": "^2.4.1",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {}
+}
