@@ -25,11 +25,15 @@ on:
   push:
     branches: ['main']
     paths:
-      - './**'
+      # replace this with <value of PACKAGE_PATH>/**
+      # Do not use ${{ env.PACKAGE_PATH }} here, as it won't be resolved
+      - '**'
   pull_request:
     branches: ['main']
     paths:
-      - './**'
+      # replace this with <value of PACKAGE_PATH>/**
+      # Do not use ${{ env.PACKAGE_PATH }} here, as it won't be resolved
+      - '**'
 
 permissions:
   contents: read
@@ -48,7 +52,13 @@ jobs:
           - 24
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout full repository
+        if: ${{ env.PACKAGE_PATH == '.' }}
+        uses: actions/checkout@v4
+
+      - name: Sparse checkout only the package path
+        if: ${{ env.PACKAGE_PATH != '.' }}
+        uses: actions/checkout@v4
         with:
           sparse-checkout: |
             ${{ env.PACKAGE_PATH }}
