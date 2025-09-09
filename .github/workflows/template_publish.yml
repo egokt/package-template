@@ -7,9 +7,7 @@
 #    relative to your repo's root.
 # 4. Update the PACKAGE_TAG_PREFIX environment variable below.
 #    The PACKAGE_TAG_PREFIX should match the prefix used in your package's version tags.
-# 5. Update the PACKAGE_REGISTRY and PACKAGE_SCOPE environment
-#    variables below to set the registry to publish to, and the scope to publish under, if any.
-# 6. Configure environment variables for authentication tokens in your repository settings,
+# 5. Configure environment variables for authentication tokens in your repository settings,
 #    and reference them in the relevant steps below.
 
 name: Template Package Publish ** CHANGE THIS WITH YOUR PACKAGE NAME **
@@ -31,13 +29,6 @@ env:
   # and uncomment the relevant environment variables in the steps below.
   #  Otherwise, the publish step will fail.
   PACKAGE_REGISTRY: 'https://npm.pkg.github.com'
-
-  # Package scope to publish under, if any
-  # e.g. @egokt
-  # Optional, so uncomment only if needed.
-  # This must match the "name" field in package.json if it is scoped.
-  # For github packages, this must match the repository owner.
-  # PACKAGE_SCOPE: "<< Package scope, e.g. @egokt >>"
 
 on:
   push:
@@ -80,10 +71,10 @@ jobs:
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
         # because we don't want to risk leaking them to other steps.
         # env:
-        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
-        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+        #   NPM_TOKEN: $ {{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
 
       - name: Run tests
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -115,10 +106,10 @@ jobs:
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
         # because we don't want to risk leaking them to other steps.
         # env:
-        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
-        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+        #   NPM_TOKEN: $ {{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
 
       - name: Publish
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -133,7 +124,7 @@ jobs:
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
         # because we don't want to risk leaking them to other steps.
         # env:
-        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
-        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+        #   NPM_TOKEN: $ {{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
