@@ -72,10 +72,10 @@ jobs:
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
         # because we don't want to risk leaking them to other steps.
         # env:
-        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
-        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+        #   NPM_TOKEN: $ {{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: $ {{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: $ {{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
 
       - name: Build
         run: npm run build
