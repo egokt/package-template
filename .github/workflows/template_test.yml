@@ -20,6 +20,7 @@ env:
   # This only applies to the jobs section.
   # You must also manually update the "on" section below.
   PACKAGE_PATH: '.'
+  ACTIONS_STEP_DEBUG: 'true'
 
 on:
   push:
