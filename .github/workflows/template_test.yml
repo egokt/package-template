@@ -25,11 +25,11 @@ on:
   push:
     branches: ['main']
     paths:
-      - '.'
+      - './**'
   pull_request:
     branches: ['main']
     paths:
-      - '.'
+      - './**'
 
 permissions:
   contents: read
