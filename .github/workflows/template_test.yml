@@ -52,10 +52,16 @@ jobs:
           - 24
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout full repository
+        if: ${{ env.PACKAGE_PATH == '.' }}
+        uses: actions/checkout@v4
+
+      - name: Sparse checkout only the package path
+        if: ${{ env.PACKAGE_PATH != '.' }}
+        uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            ${{ env.PACKAGE_PATH }}/**
+            ${{ env.PACKAGE_PATH }}
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
