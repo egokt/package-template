@@ -64,7 +64,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ${{ env.PACKAGE_PATH }}.nvmrc
           cache: 'npm'
           cache-dependency-path: ${{ env.PACKAGE_PATH }}/package-lock.json
 

@@ -15,17 +15,21 @@ name: Template Package Tests ** CHANGE THIS WITH YOUR PACKAGE NAME **
 
 # NOTE: env context is only available in the jobs context below.
 env:
+  # Update this to point to the directory where your package.json file is located,
+  # relative to your repo's root.
+  # This only applies to the jobs section.
+  # You must also manually update the "on" section below.
   PACKAGE_PATH: '.'
 
 on:
   push:
     branches: ['main']
     paths:
-      - './**'
+      - '.'
   pull_request:
     branches: ['main']
     paths:
-      - './**'
+      - '.'
 
 permissions:
   contents: read
