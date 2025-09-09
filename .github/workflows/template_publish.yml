@@ -2,31 +2,41 @@
 # 1. Copy this file to your repo's .github/workflows/ directory.
 #    DO NOT symlink. Github Actions does not support symlinks.
 # 2. Update the name at the top of the file.
-# 3. Update the PACKAGE_TAG_PREFIX and PACKAGE_PATH environment variables below.
-#    * The PACKAGE_TAG_PREFIX should match the prefix used in your package's version tags.
-#    * The PACKAGE_PATH should point to the directory where your package.json file is located,
-#      relative to your repo's root.
-# 4. If your package is published to GitHub Packages or it uses private dependencies
-#    from GitHub Packages, uncomment the PACKAGE_REGISTRY and PACKAGE_SCOPE environment
-#    variables below, and the corresponding lines in the setup-node step.
-# 5. If your package uses private dependencies from GitHub Packages, uncomment the
-#    "Configure npm authentication" step below.
+# 3. Update the PACKAGE_PATH environment variable below.
+#    The PACKAGE_PATH should point to the directory where your package.json file is located,
+#    relative to your repo's root.
+# 4. Update the PACKAGE_TAG_PREFIX environment variable below.
+#    The PACKAGE_TAG_PREFIX should match the prefix used in your package's version tags.
+# 5. Update the PACKAGE_REGISTRY and PACKAGE_SCOPE environment
+#    variables below to set the registry to publish to, and the scope to publish under, if any.
+# 6. Configure environment variables for authentication tokens in your repository settings,
+#    and reference them in the relevant steps below.
 
 name: Template Package Publish ** CHANGE THIS WITH YOUR PACKAGE NAME **
 
 # NOTE: env context is only available in the jobs context below.
 env:
-  NODE_VERSION: '22.14.0'
   PACKAGE_PATH: '.'
 
   # When you update the PACKAGE_TAG_PREFIX, you must also update
   # the on.push.tags and concurrency.group values below.
   PACKAGE_TAG_PREFIX: 'template'
 
-  # Uncomment the following two lines
-  # if your package is published to GitHub Packages
-  # or it uses private dependencies from GitHub Packages
-  # PACKAGE_REGISTRY: "https://npm.pkg.github.com"
+  # Package registry to publish to
+  # Some frequently used registries:
+  # npmjs: https://registry.npmjs.org/
+  # GitHub Packages: https://npm.pkg.github.com/
+  # IMPORTANT NOTE: If this repository requires authentication to access
+  # the registry, you must configure authentication in the NPMRC_CONTENTS below,
+  # and uncomment the relevant environment variables in the steps below.
+  #  Otherwise, the publish step will fail.
+  PACKAGE_REGISTRY: 'https://npm.pkg.github.com'
+
+  # Package scope to publish under, if any
+  # e.g. @egokt
+  # Optional, so uncomment only if needed.
+  # This must match the "name" field in package.json if it is scoped.
+  # For github packages, this must match the repository owner.
   # PACKAGE_SCOPE: "<< Package scope, e.g. @egokt >>"
 
 on:
@@ -50,46 +60,45 @@ jobs:
         with:
           sparse-checkout: |
             ${{ env.PACKAGE_PATH }}
-      - name: Use Node.js ${{ env.NODE_VERSION }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: ${{ env.PACKAGE_PATH }}.nvmrc
           cache: 'npm'
           cache-dependency-path: ${{ env.PACKAGE_PATH }}/package-lock.json
-          # Uncomment the following two lines
-          # if your package is published to GitHub Packages
-          # or it uses private dependencies from GitHub Packages
-          # registry-url: ${{ env.PACKAGE_REGISTRY }}
-          # scope: ${{ env.PACKAGE_SCOPE }}
 
-      # Uncomment the following step and set scope and repository entries
-      # if your package uses private dependencies from GitHub Packages.
-      # The example below sets up github as repository and @egokt as scope.
-      # - name: Configure npm authentication
-      #   run: |
-      #     echo "@egokt:registry=https://npm.pkg.github.com" >> ~/.npmrc
-      #     echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
-      #     echo "always-auth=true" >> ~/.npmrc
-      #   working-directory: ${{ env.PACKAGE_PATH }}
       - name: Install dependencies
-        run: npm ci
         working-directory: ${{ env.PACKAGE_PATH }}
-        # Uncomment the following two lines
-        # if your package uses private dependencies from GitHub Packages
+        # Skip post-install scripts here with --ignore-scripts, as a malicious
+        # script could steal auth tokens.
+        run: npm ci --ignore-scripts
+        # UPDATE THE ENVIRONMENT VARIABLES BELOW AS NEEDED *********************
+        # If you are using npm repositories that require authentication,
+        # uncomment the following env block and provide any needed
+        # authentication token environment variables.
+        # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
+        # because we don't want to risk leaking them to other steps.
         # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+
       - name: Run tests
-        run: npm run ci:check
         working-directory: ${{ env.PACKAGE_PATH }}
+        run: npm run ci:check
+
       - name: Verify version matches tag
         working-directory: ${{ env.PACKAGE_PATH }}
         run: |
           PKG_VERSION=$(jq -r '.version' package.json)
           TAG_VERSION=${GITHUB_REF#refs/tags/${{ env.PACKAGE_TAG_PREFIX }}/v}
-            if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
-              echo "package.json version ($PKG_VERSION) != tag version ($TAG_VERSION)" >&2
-              exit 1
-            fi
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "package.json version ($PKG_VERSION) != tag version ($TAG_VERSION)" >&2
+            exit 1
+          fi
+
       - name: Skip if version already published
         working-directory: ${{ env.PACKAGE_PATH }}
         run: |
@@ -99,11 +108,32 @@ jobs:
             echo "Version $PKG_NAME@$PKG_VERSION already exists. Skipping publish."
             echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
           fi
+        # UPDATE THE ENVIRONMENT VARIABLES BELOW AS NEEDED *********************
+        # If you are using npm repositories that require authentication,
+        # uncomment the following env block and provide any needed
+        # authentication token environment variables.
+        # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
+        # because we don't want to risk leaking them to other steps.
+        # env:
+        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
+
       - name: Publish
+        working-directory: ${{ env.PACKAGE_PATH }}
         run: |
           if [ "$SKIP_PUBLISH" = "true" ]; then
             echo "Publish step skipped."; exit 0; fi
           npm run publish
-        working-directory: ${{ env.PACKAGE_PATH }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # UPDATE THE ENVIRONMENT VARIABLES BELOW AS NEEDED *********************
+        # If you are using npm repositories that require authentication,
+        # uncomment the following env block and provide any needed
+        # authentication token environment variables.
+        # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
+        # because we don't want to risk leaking them to other steps.
+        # env:
+        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   PRIVATE_TOKEN_FOR_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_ANOTHER_SCOPE }}
+        #   PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE: ${{ secrets.PRIVATE_TOKEN_FOR_YET_ANOTHER_SCOPE }}
