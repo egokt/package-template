@@ -20,16 +20,6 @@ env:
   # the on.push.tags and concurrency.group values below.
   PACKAGE_TAG_PREFIX: 'template'
 
-  # Package registry to publish to
-  # Some frequently used registries:
-  # npmjs: https://registry.npmjs.org/
-  # GitHub Packages: https://npm.pkg.github.com/
-  # IMPORTANT NOTE: If this repository requires authentication to access
-  # the registry, you must configure authentication in the NPMRC_CONTENTS below,
-  # and uncomment the relevant environment variables in the steps below.
-  #  Otherwise, the publish step will fail.
-  PACKAGE_REGISTRY: 'https://npm.pkg.github.com'
-
 on:
   push:
     tags:
@@ -61,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ${{ env.PACKAGE_PATH }}.nvmrc
+          node-version-file: ${{ env.PACKAGE_PATH }}/.nvmrc
           cache: 'npm'
           cache-dependency-path: ${{ env.PACKAGE_PATH }}/package-lock.json
 
@@ -101,14 +91,16 @@ jobs:
         run: |
           PKG_NAME=$(jq -r '.name' package.json)
           PKG_VERSION=$(jq -r '.version' package.json)
-          if npm view "$PKG_NAME@$PKG_VERSION" version --registry=${{ env.PACKAGE_REGISTRY }} > /dev/null 2>&1; then
+          if npm view "$PKG_NAME@$PKG_VERSION" version > /dev/null 2>&1; then
             echo "Version $PKG_NAME@$PKG_VERSION already exists. Skipping publish."
             echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
           fi
         # UPDATE THE ENVIRONMENT VARIABLES BELOW AS NEEDED *********************
-        # If you are using npm repositories that require authentication,
+        # If you are publishing to an npm repository that requires authentication,
         # uncomment the following env block and provide any needed
         # authentication token environment variables.
+        # NOTE: You need the GITHUB_TOKEN here to avoid a 401 Unauthorized error,
+        # even when publishing a public package to the github npm registry.
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
         # because we don't want to risk leaking them to other steps.
         # env:
@@ -119,12 +111,13 @@ jobs:
 
       - name: Publish
         working-directory: ${{ env.PACKAGE_PATH }}
+        # The following line might show a warning in the IDE.
+        # The SKIP_PUBLISH variable is created in the environment in the previous step.
+        if: ${{ env.SKIP_PUBLISH != 'true' }}
         run: |
-          if [ "$SKIP_PUBLISH" = "true" ]; then
-            echo "Publish step skipped."; exit 0; fi
-          npm run publish
+          npm run ship
         # UPDATE THE ENVIRONMENT VARIABLES BELOW AS NEEDED *********************
-        # If you are using npm repositories that require authentication,
+        # If you are publishing to an npm repository that requires authentication,
         # uncomment the following env block and provide any needed
         # authentication token environment variables.
         # NOTE: We don't use GITHUB_ENV to pass these variables to later steps
