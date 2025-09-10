@@ -1,0 +1,5 @@
+# Ignore npmignore
+.npmignore
+
+# do not include the npmrc file in the package
+.npmrc

@@ -8,7 +8,7 @@ A TypeScript package template with modern development tooling and best practices
 2. **Install**: `npm install`
 3. **Develop**: Write code in `src/`, tests in `tests/`
 4. **Build**: `npm run build` or `npm run build:watch`
-5. **Publish**: `npm run publish`
+5. **Publish**: `npm run ship`
 
 ## Build System
 
@@ -16,6 +16,8 @@ Uses dual TypeScript configs for flexible compilation:
 
 - `tsconfig.json` - Development (includes src + tests)
 - `tsconfig.build.json` - Package/production build (src only)
+
+The build process compiles TypeScript and copies essential files to the `build/` directory for publishing.
 
 ### Build Commands
 
@@ -109,20 +111,44 @@ build/         # Compiled output
 
 - `eslint.config.js` - Modern flat config with TypeScript rules
 - `.prettierrc` - Code formatting rules
+- `.npmrc` - NPM registry, scoped packages, and authentication configuration
+- `.npmignore` - Files to exclude from published npm package
+- `.nvmrc` - Node.js version specification for nvm
 - `tsconfig.json` / `tsconfig.build.json` - TypeScript compilation
 - `jest.config.js` - Test configuration
 
 ## Publishing
 
+Some notes on publishing:
+
+- The package includes an `.npmignore` file that excludes certain files from the published package:
+  - `.npmrc` - Contains npm configuration and is copied to build but excluded from package
+  - `.npmignore` - Excludes itself from the published package
+- If you are publishing a public package, you must remove the key `private` or
+  set it to false in `package.json` to be able to publish your package.
+
+### NPM Configuration
+
+The `.npmrc` file configures npm registry settings, scoped packages, and authentication:
+
+- **Default Registry**: Set to `https://registry.npmjs.org/` by default
+- **Scoped Packages**: Configure different registries for specific scopes (e.g., `@company`, `@github`)
+- **Authentication**: Uses environment variables for tokens (never hardcode tokens)
+  - `${NPM_TOKEN}` for npmjs.org
+  - `${GITHUB_TOKEN}` for GitHub Packages
+  - Custom tokens for private registries
+
+The file includes commented examples for GitHub Packages and private registries. Uncomment and modify as needed for your setup.
+
 ### Manual Publishing
 
-The `publish` script builds to `build/` directory and publishes from there:
+The `ship` script builds to `build/` directory and publishes from there:
 
 ```bash
-npm run publish  # Build + publish to npm registry
+npm run ship  # Build + publish to npm registry
 ```
 
-Files copied to build: `package.json`, `README.md`, `LICENSE.md`
+Files copied to build: `.npmrc`, `.npmignore`, `package.json`, `README.md`, `LICENSE.md`
 
 ### Automated Publishing via GitHub Actions
 
@@ -134,6 +160,7 @@ The package includes an automated publishing workflow (`.github/workflows/templa
 - **Version Validation**: Checks that the tag version matches the version in `package.json`
 - **Duplicate Check**: Fails if the version already exists in the npm registry
 - **CI Pipeline**: Runs the full test suite before publishing
+- **Authentication**: Supports both public npm registry and private registries with token-based authentication
 
 #### Publishing a New Version
 
@@ -170,4 +197,8 @@ When copying this template:
 1. **Copy workflow file**: Copy `.github/workflows/template_publish.yml` to `.github/workflows/` in your repo root
 2. Update the workflow name and `PACKAGE_TAG_PREFIX` environment variable
 3. Update the `on.push.tags` pattern to match your package prefix
-4. Uncomment GitHub Packages configuration if publishing privately
+4. Configure authentication if publishing to registries that require it:
+   - For public npm registry (npmjs.org): Authentication is not required for public packages
+   - For GitHub Packages: `GITHUB_TOKEN` is automatically available but may need explicit configuration
+   - For private registries: Set appropriate tokens (e.g., `NPM_TOKEN`) as secrets in repository settings
+   - Uncomment and configure the environment variables in the workflow steps as needed

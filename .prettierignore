@@ -31,6 +31,9 @@ Thumbs.db
 # Lock files (keep consistent formatting in source)
 package-lock.json
 
+# nvmrc
+.nvmrc
+
 # Documentation that might have specific formatting
 LICENSE.md
 
